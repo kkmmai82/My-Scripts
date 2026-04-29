@@ -1,287 +1,264 @@
--- تصميم عصري مع تأثيرات زجاجية وإضاءة بنفسجية
+--[[
+ .____                  ________ ___.    _____                           __                
+ |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
+ |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
+ |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
+ |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
+         \/          \/         \/    \/                \/     \/     \/                   
+          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+]]--
 
--- إنشاء الواجهة الرئيسية
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "AppleWareKeySystem"
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
--- الإطار الرئيسي (Glassmorphism + عصري)
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 450, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 15, 35)
-mainFrame.BackgroundTransparency = 0.15
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
-
--- زوايا مستديرة ناعمة
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 20)
-corner.Parent = mainFrame
-
--- إطار شفاف خلفي (Glass effect)
-local glassEffect = Instance.new("Frame")
-glassEffect.Size = UDim2.new(1, 0, 1, 0)
-glassEffect.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-glassEffect.BackgroundTransparency = 0.92
-glassEffect.BorderSizePixel = 0
-glassEffect.Parent = mainFrame
-local glassCorner = Instance.new("UICorner")
-glassCorner.CornerRadius = UDim.new(0, 20)
-glassCorner.Parent = glassEffect
-
--- حد خارجي بنفسجي (Glow border)
-local borderGlow = Instance.new("Frame")
-borderGlow.Size = UDim2.new(1, 4, 1, 4)
-borderGlow.Position = UDim2.new(0, -2, 0, -2)
-borderGlow.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-borderGlow.BackgroundTransparency = 0.7
-borderGlow.BorderSizePixel = 0
-borderGlow.Parent = mainFrame
-local borderCorner = Instance.new("UICorner")
-borderCorner.CornerRadius = UDim.new(0, 22)
-borderCorner.Parent = borderGlow
-
--- شريط علوي بنفسجي (Gradient)
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 5)
-topBar.Position = UDim2.new(0, 0, 0, 0)
-topBar.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-topBar.BorderSizePixel = 0
-topBar.Parent = mainFrame
-local topCorner = Instance.new("UICorner")
-topCorner.CornerRadius = UDim.new(0, 20)
-topCorner.Parent = topBar
--- تقطيع الزوايا العلوية فقط
-local clipTop = Instance.new("UICorner")
-clipTop.CornerRadius = UDim.new(0, 20)
-local topOnly = Instance.new("Frame")
-topOnly.Size = UDim2.new(1, 0, 0, 20)
-topOnly.BackgroundTransparency = 1
-topOnly.Parent = topBar
-Instance.new("UICorner").CornerRadius = UDim.new(0, 20)
-
--- عنوان رئيسي مع توهج
-local title = Instance.new("TextLabel")
-title.Text = "✨ N7R-WARE ✨"
-title.Size = UDim2.new(1, 0, 0, 55)
-title.Position = UDim2.new(0, 0, 0, 10)
-title.TextColor3 = Color3.fromRGB(200, 130, 255)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 28
-title.Parent = mainFrame
-
--- نص ثانوي
-local subTitle = Instance.new("TextLabel")
-subTitle.Text = "راح تحصل مفتاح بالديسكورد"
-subTitle.Size = UDim2.new(1, 0, 0, 25)
-subTitle.Position = UDim2.new(0, 0, 0, 50)
-subTitle.TextColor3 = Color3.fromRGB(180, 160, 200)
-subTitle.BackgroundTransparency = 1
-subTitle.Font = Enum.Font.Gotham
-subTitle.TextSize = 14
-subTitle.Parent = mainFrame
-
--- مكان إدخال المفتاح (مصمم بشكل عصري)
-local keyInput = Instance.new("TextBox")
-keyInput.PlaceholderText = "🔑حط المفتاح..."
-keyInput.Text = ""
-keyInput.Size = UDim2.new(0.7, 0, 0, 45)
-keyInput.Position = UDim2.new(0.15, 0, 0.45, 0)
-keyInput.BackgroundColor3 = Color3.fromRGB(35, 25, 45)
-keyInput.BackgroundTransparency = 0.5
-keyInput.TextColor3 = Color3.fromRGB(230, 200, 255)
-keyInput.TextSize = 16
-keyInput.Font = Enum.Font.Gotham
-keyInput.ClearTextOnFocus = false
-keyInput.Parent = mainFrame
-
--- زوايا مدخل النص
-local inputCorner = Instance.new("UICorner")
-inputCorner.CornerRadius = UDim.new(0, 12)
-inputCorner.Parent = keyInput
-
--- Stroke (حد) للمدخل
-local inputStroke = Instance.new("UIStroke")
-inputStroke.Color = Color3.fromRGB(138, 43, 226)
-inputStroke.Thickness = 1.5
-inputStroke.Transparency = 0.5
-inputStroke.Parent = keyInput
-
--- زر التفعيل (تصميم انيميشن)
-local activateBtn = Instance.new("TextButton")
-activateBtn.Text = "🚀 تشغيل"
-activateBtn.Size = UDim2.new(0.4, 0, 0, 48)
-activateBtn.Position = UDim2.new(0.3, 0, 0.68, 0)
-activateBtn.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-activateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-activateBtn.TextSize = 16
-activateBtn.Font = Enum.Font.GothamBold
-activateBtn.AutoButtonColor = false
-activateBtn.Parent = mainFrame
-
--- زوايا الزر
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 25)
-btnCorner.Parent = activateBtn
-
--- توهج للزر
-local btnGlow = Instance.new("Frame")
-btnGlow.Size = UDim2.new(1, 8, 1, 8)
-btnGlow.Position = UDim2.new(0, -4, 0, -4)
-btnGlow.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-btnGlow.BackgroundTransparency = 0.8
-btnGlow.BorderSizePixel = 0
-btnGlow.Parent = activateBtn
-local glowCorner = Instance.new("UICorner")
-glowCorner.CornerRadius = UDim.new(0, 28)
-glowCorner.Parent = btnGlow
-
--- نص HWID مع رمز
-local hwidText = Instance.new("TextLabel")
-hwidText.Text = "🖥️ رقم التسلسلي: " .. game:GetService("RbxAnalyticsService"):GetClientId()
-hwidText.Size = UDim2.new(1, 0, 0, 25)
-hwidText.Position = UDim2.new(0, 0, 0.88, 0)
-hwidText.BackgroundTransparency = 1
-hwidText.TextColor3 = Color3.fromRGB(160, 100, 200)
-hwidText.TextSize = 11
-hwidText.Font = Enum.Font.Gotham
-hwidText.Parent = mainFrame
-
--- تأثير تحميل (Loading)
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(0, 30, 0, 30)
-loadingFrame.Position = UDim2.new(0.5, -15, 0.5, -15)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-loadingFrame.BackgroundTransparency = 1
-loadingFrame.Visible = false
-loadingFrame.Parent = mainFrame
-local loadCorner = Instance.new("UICorner")
-loadCorner.CornerRadius = UDim.new(1, 0)
-loadCorner.Parent = loadingFrame
-
--- ========== المنطق البرمجي ==========
-local correctKey = "N7R-WARE_2026" -- 🔐 غيّر هذا المفتاح
-
--- تأثيرات الانيميشن عند دخول الماوس
-activateBtn.MouseEnter:Connect(function()
-    local tween = TweenService:Create(activateBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundColor3 = Color3.fromRGB(170, 70, 250)
-    })
-    tween:Play()
-    local glowTween = TweenService:Create(btnGlow, TweenInfo.new(0.2), {BackgroundTransparency = 0.5})
-    glowTween:Play()
-end)
-
-activateBtn.MouseLeave:Connect(function()
-    local tween = TweenService:Create(activateBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundColor3 = Color3.fromRGB(138, 43, 226)
-    })
-    tween:Play()
-    local glowTween = TweenService:Create(btnGlow, TweenInfo.new(0.2), {BackgroundTransparency = 0.8})
-    glowTween:Play()
-end)
-
--- تأثير على مدخل النص عند التركيز
-keyInput.Focused:Connect(function()
-    local strokeTween = TweenService:Create(inputStroke, TweenInfo.new(0.2), {Thickness = 2.5, Transparency = 0})
-    strokeTween:Play()
-end)
-
-keyInput.FocusLost:Connect(function()
-    local strokeTween = TweenService:Create(inputStroke, TweenInfo.new(0.2), {Thickness = 1.5, Transparency = 0.5})
-    strokeTween:Play()
-end)
-
--- دالة لإظهار رسالة خطأ جميلة
-local function showError(message)
-    local errorFrame = Instance.new("Frame")
-    errorFrame.Size = UDim2.new(0, 250, 0, 40)
-    errorFrame.Position = UDim2.new(0.5, -125, 0, -50)
-    errorFrame.BackgroundColor3 = Color3.fromRGB(50, 20, 30)
-    errorFrame.BackgroundTransparency = 0.1
-    errorFrame.Parent = mainFrame
-    
-    local errCorner = Instance.new("UICorner")
-    errCorner.CornerRadius = UDim.new(0, 10)
-    errCorner.Parent = errorFrame
-    
-    local errStroke = Instance.new("UIStroke")
-    errStroke.Color = Color3.fromRGB(255, 60, 100)
-    errStroke.Thickness = 1
-    errStroke.Parent = errorFrame
-    
-    local errText = Instance.new("TextLabel")
-    errText.Text = "❌ " .. message
-    errText.Size = UDim2.new(1, 0, 1, 0)
-    errText.BackgroundTransparency = 1
-    errText.TextColor3 = Color3.fromRGB(255, 180, 200)
-    errText.TextSize = 14
-    errText.Font = Enum.Font.Gotham
-    errText.Parent = errorFrame
-    
-    local tweenIn = TweenService:Create(errorFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -125, 0, 10)})
-    tweenIn:Play()
-    
-    task.wait(2.5)
-    local tweenOut = TweenService:Create(errorFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Position = UDim2.new(0.5, -125, 0, -50)})
-    tweenOut:Play()
-    tweenOut.Completed:Connect(function() errorFrame:Destroy() end)
+local StrToNumber = tonumber;
+local Byte = string.byte;
+local Char = string.char;
+local Sub = string.sub;
+local Subg = string.gsub;
+local Rep = string.rep;
+local Concat = table.concat;
+local Insert = table.insert;
+local LDExp = math.ldexp;
+local GetFEnv = getfenv or function()
+	return _ENV;
+end;
+local Setmetatable = setmetatable;
+local PCall = pcall;
+local Select = select;
+local Unpack = unpack or table.unpack;
+local ToNumber = tonumber;
+local function VMCall(ByteString, vmenv, ...)
+	local DIP = 1;
+	local repeatNext;
+	ByteString = Subg(Sub(ByteString, 5), "..", function(byte)
+		if (Byte(byte, 2) == 81) then
+			repeatNext = StrToNumber(Sub(byte, 1, 1));
+			return "";
+		else
+			local a = Char(StrToNumber(byte, 16));
+			if repeatNext then
+				local b = Rep(a, repeatNext);
+				repeatNext = nil;
+				return b;
+			else
+				return a;
+			end
+		end
+	end);
+	local function gBit(Bit, Start, End)
+		if End then
+			local Res = (Bit / (2 ^ (Start - 1))) % (2 ^ (((End - 1) - (Start - 1)) + 1));
+			return Res - (Res % 1);
+		else
+			local Plc = 2 ^ (Start - 1);
+			return (((Bit % (Plc + Plc)) >= Plc) and 1) or 0;
+		end
+	end
+	local function gBits8()
+		local a = Byte(ByteString, DIP, DIP);
+		DIP = DIP + 1;
+		return a;
+	end
+	local function gBits16()
+		local a, b = Byte(ByteString, DIP, DIP + 2);
+		DIP = DIP + 2;
+		return (b * 256) + a;
+	end
+	local function gBits32()
+		local a, b, c, d = Byte(ByteString, DIP, DIP + 3);
+		DIP = DIP + 4;
+		return (d * 16777216) + (c * 65536) + (b * 256) + a;
+	end
+	local function gFloat()
+		local Left = gBits32();
+		local Right = gBits32();
+		local IsNormal = 1;
+		local Mantissa = (gBit(Right, 1, 20) * (2 ^ 32)) + Left;
+		local Exponent = gBit(Right, 21, 31);
+		local Sign = ((gBit(Right, 32) == 1) and -1) or 1;
+		if (Exponent == 0) then
+			if (Mantissa == 0) then
+				return Sign * 0;
+			else
+				Exponent = 1;
+				IsNormal = 0;
+			end
+		elseif (Exponent == 2047) then
+			return ((Mantissa == 0) and (Sign * (1 / 0))) or (Sign * NaN);
+		end
+		return LDExp(Sign, Exponent - 1023) * (IsNormal + (Mantissa / (2 ^ 52)));
+	end
+	local function gString(Len)
+		local Str;
+		if not Len then
+			Len = gBits32();
+			if (Len == 0) then
+				return "";
+			end
+		end
+		Str = Sub(ByteString, DIP, (DIP + Len) - 1);
+		DIP = DIP + Len;
+		local FStr = {};
+		for Idx = 1, #Str do
+			FStr[Idx] = Char(Byte(Sub(Str, Idx, Idx)));
+		end
+		return Concat(FStr);
+	end
+	local gInt = gBits32;
+	local function _R(...)
+		return {...}, Select("#", ...);
+	end
+	local function Deserialize()
+		local Instrs = {};
+		local Functions = {};
+		local Lines = {};
+		local Chunk = {Instrs,Functions,nil,Lines};
+		local ConstCount = gBits32();
+		local Consts = {};
+		for Idx = 1, ConstCount do
+			local Type = gBits8();
+			local Cons;
+			if (Type == 1) then
+				Cons = gBits8() ~= 0;
+			elseif (Type == 2) then
+				Cons = gFloat();
+			elseif (Type == 3) then
+				Cons = gString();
+			end
+			Consts[Idx] = Cons;
+		end
+		Chunk[3] = gBits8();
+		for Idx = 1, gBits32() do
+			local Descriptor = gBits8();
+			if (gBit(Descriptor, 1, 1) == 0) then
+				local Type = gBit(Descriptor, 2, 3);
+				local Mask = gBit(Descriptor, 4, 6);
+				local Inst = {gBits16(),gBits16(),nil,nil};
+				if (Type == 0) then
+					Inst[3] = gBits16();
+					Inst[4] = gBits16();
+				elseif (Type == 1) then
+					Inst[3] = gBits32();
+				elseif (Type == 2) then
+					Inst[3] = gBits32() - (2 ^ 16);
+				elseif (Type == 3) then
+					Inst[3] = gBits32() - (2 ^ 16);
+					Inst[4] = gBits16();
+				end
+				if (gBit(Mask, 1, 1) == 1) then
+					Inst[2] = Consts[Inst[2]];
+				end
+				if (gBit(Mask, 2, 2) == 1) then
+					Inst[3] = Consts[Inst[3]];
+				end
+				if (gBit(Mask, 3, 3) == 1) then
+					Inst[4] = Consts[Inst[4]];
+				end
+				Instrs[Idx] = Inst;
+			end
+		end
+		for Idx = 1, gBits32() do
+			Functions[Idx - 1] = Deserialize();
+		end
+		return Chunk;
+	end
+	local function Wrap(Chunk, Upvalues, Env)
+		local Instr = Chunk[1];
+		local Proto = Chunk[2];
+		local Params = Chunk[3];
+		return function(...)
+			local Instr = Instr;
+			local Proto = Proto;
+			local Params = Params;
+			local _R = _R;
+			local VIP = 1;
+			local Top = -1;
+			local Vararg = {};
+			local Args = {...};
+			local PCount = Select("#", ...) - 1;
+			local Lupvals = {};
+			local Stk = {};
+			for Idx = 0, PCount do
+				if (Idx >= Params) then
+					Vararg[Idx - Params] = Args[Idx + 1];
+				else
+					Stk[Idx] = Args[Idx + 1];
+				end
+			end
+			local Varargsz = (PCount - Params) + 1;
+			local Inst;
+			local Enum;
+			while true do
+				Inst = Instr[VIP];
+				Enum = Inst[1];
+				if (Enum <= 6) then
+					if (Enum <= 2) then
+						if (Enum <= 0) then
+							do
+								return;
+							end
+						elseif (Enum == 1) then
+							local A = Inst[2];
+							local B = Stk[Inst[3]];
+							Stk[A + 1] = B;
+							Stk[A] = B[Inst[4]];
+						else
+							local A = Inst[2];
+							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+						end
+					elseif (Enum <= 4) then
+						if (Enum == 3) then
+							Stk[Inst[2]] = Inst[3];
+						else
+							local A = Inst[2];
+							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+						end
+					elseif (Enum > 5) then
+						do
+							return;
+						end
+					else
+						local A = Inst[2];
+						local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
+						Top = (Limit + A) - 1;
+						local Edx = 0;
+						for Idx = A, Top do
+							Edx = Edx + 1;
+							Stk[Idx] = Results[Edx];
+						end
+					end
+				elseif (Enum <= 9) then
+					if (Enum <= 7) then
+						Stk[Inst[2]] = Inst[3];
+					elseif (Enum > 8) then
+						Stk[Inst[2]]();
+					else
+						local A = Inst[2];
+						local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
+						Top = (Limit + A) - 1;
+						local Edx = 0;
+						for Idx = A, Top do
+							Edx = Edx + 1;
+							Stk[Idx] = Results[Edx];
+						end
+					end
+				elseif (Enum <= 11) then
+					if (Enum == 10) then
+						Stk[Inst[2]]();
+					else
+						local A = Inst[2];
+						local B = Stk[Inst[3]];
+						Stk[A + 1] = B;
+						Stk[A] = B[Inst[4]];
+					end
+				elseif (Enum > 12) then
+					Stk[Inst[2]] = Env[Inst[3]];
+				else
+					Stk[Inst[2]] = Env[Inst[3]];
+				end
+				VIP = VIP + 1;
+			end
+		end;
+	end
+	return Wrap(Deserialize(), {}, vmenv)(...);
 end
-
--- التحقق من المفتاح
-activateBtn.MouseButton1Click:Connect(function()
-    if keyInput.Text == correctKey then
-        -- تأثير نجاح
-        local successTween = TweenService:Create(mainFrame, TweenInfo.new(0.2), {BackgroundTransparency = 0.3})
-        successTween:Play()
-        
-        print("✅ تم تفعيل السكربت بنجاح!")
-        
-        -- تأثير انيميشن للإغلاق
-        local closeTween = TweenService:Create(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
-            Size = UDim2.new(0, 300, 0, 200),
-            Position = UDim2.new(0.5, -150, 0.5, -100),
-            BackgroundTransparency = 1
-        })
-        closeTween:Play()
-        
-        task.wait(0.4)
-        screenGui:Destroy()
-        
-        -- ====== هنا ضع سكربتك الأساسي بعد التفعيل ======
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/kkmmai82/My-Scripts/refs/heads/main/test'))()
-        -- أو ضع كود السكربت مباشرة هنا
-    else
-        showError("غلط تاكد من مفتاحك.")
-        
-        -- تأثير اهتزاز للمدخل
-        local originalPos = keyInput.Position
-        for i = 1, 4 do
-            local shakeX = (i % 2 == 0 and 5 or -5)
-            keyInput.Position = UDim2.new(0.15, shakeX, 0.45, 0)
-            task.wait(0.02)
-        end
-        keyInput.Position = originalPos
-        keyInput.Text = ""
-    end
-end)
-
--- تأثير ظهور الواجهة (Fade in + Scale)
-mainFrame.BackgroundTransparency = 1
-mainFrame.Size = UDim2.new(0, 400, 0, 240)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -120)
-
-local showTween = TweenService:Create(mainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    BackgroundTransparency = 0.15,
-    Size = UDim2.new(0, 450, 0, 280),
-    Position = UDim2.new(0.5, -225, 0.5, -140)
-})
-showTween:Play()
+return VMCall("LOL!043Q00030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403213Q00682Q7470733A2Q2F706173746562696E2E636F6D2F7261772F52375350314A626600083Q00120C3Q00013Q00120C000100023Q002001000100010003001207000300044Q0005000100034Q00025Q00022Q000A3Q000100012Q00063Q00017Q00", GetFEnv(), ...);
