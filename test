@@ -194,50 +194,23 @@ local function VMCall(ByteString, vmenv, ...)
 					if (Enum <= 2) then
 						if (Enum <= 0) then
 							local A = Inst[2];
-							local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
-							Top = (Limit + A) - 1;
-							local Edx = 0;
-							for Idx = A, Top do
-								Edx = Edx + 1;
-								Stk[Idx] = Results[Edx];
-							end
-						elseif (Enum > 1) then
-							Stk[Inst[2]]();
-						else
+							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+						elseif (Enum == 1) then
 							local A = Inst[2];
 							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+						else
+							Stk[Inst[2]] = Env[Inst[3]];
 						end
 					elseif (Enum <= 4) then
 						if (Enum > 3) then
 							Stk[Inst[2]] = Env[Inst[3]];
 						else
-							do
-								return;
-							end
+							local A = Inst[2];
+							local B = Stk[Inst[3]];
+							Stk[A + 1] = B;
+							Stk[A] = B[Inst[4]];
 						end
 					elseif (Enum == 5) then
-						local A = Inst[2];
-						Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
-					else
-						Stk[Inst[2]] = Inst[3];
-					end
-				elseif (Enum <= 9) then
-					if (Enum <= 7) then
-						Stk[Inst[2]] = Env[Inst[3]];
-					elseif (Enum > 8) then
-						Stk[Inst[2]]();
-					else
-						do
-							return;
-						end
-					end
-				elseif (Enum <= 11) then
-					if (Enum == 10) then
-						local A = Inst[2];
-						local B = Stk[Inst[3]];
-						Stk[A + 1] = B;
-						Stk[A] = B[Inst[4]];
-					else
 						local A = Inst[2];
 						local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
 						Top = (Limit + A) - 1;
@@ -246,14 +219,41 @@ local function VMCall(ByteString, vmenv, ...)
 							Edx = Edx + 1;
 							Stk[Idx] = Results[Edx];
 						end
+					else
+						Stk[Inst[2]] = Inst[3];
+					end
+				elseif (Enum <= 9) then
+					if (Enum <= 7) then
+						do
+							return;
+						end
+					elseif (Enum > 8) then
+						Stk[Inst[2]]();
+					else
+						Stk[Inst[2]] = Inst[3];
+					end
+				elseif (Enum <= 11) then
+					if (Enum == 10) then
+						local A = Inst[2];
+						local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
+						Top = (Limit + A) - 1;
+						local Edx = 0;
+						for Idx = A, Top do
+							Edx = Edx + 1;
+							Stk[Idx] = Results[Edx];
+						end
+					else
+						Stk[Inst[2]]();
 					end
 				elseif (Enum == 12) then
+					do
+						return;
+					end
+				else
 					local A = Inst[2];
 					local B = Stk[Inst[3]];
 					Stk[A + 1] = B;
 					Stk[A] = B[Inst[4]];
-				else
-					Stk[Inst[2]] = Inst[3];
 				end
 				VIP = VIP + 1;
 			end
@@ -261,4 +261,4 @@ local function VMCall(ByteString, vmenv, ...)
 	end
 	return Wrap(Deserialize(), {}, vmenv)(...);
 end
-return VMCall("LOL!043Q00030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403213Q00682Q7470733A2Q2F706173746562696E2E636F6D2F7261772F753934633762517A00083Q0012073Q00013Q001207000100023Q00200A00010001000300120D000300044Q000B000100034Q00015Q00022Q00093Q000100012Q00033Q00017Q00", GetFEnv(), ...);
+return VMCall("LOL!043Q00030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403213Q00682Q7470733A2Q2F706173746562696E2E636F6D2F7261772F4533636672386E3700083Q0012043Q00013Q001204000100023Q00200D000100010003001208000300044Q0005000100039Q0000022Q00093Q000100012Q00073Q00017Q00", GetFEnv(), ...);
