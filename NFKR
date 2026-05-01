@@ -192,7 +192,7 @@ local function VMCall(ByteString, vmenv, ...)
 				Enum = Inst[1];
 				if (Enum <= 3) then
 					if (Enum <= 1) then
-						if (Enum == 0) then
+						if (Enum > 0) then
 							local A = Inst[2];
 							local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
 							Top = (Limit + A) - 1;
@@ -202,26 +202,28 @@ local function VMCall(ByteString, vmenv, ...)
 								Stk[Idx] = Results[Edx];
 							end
 						else
-							local A = Inst[2];
-							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+							Stk[Inst[2]]();
 						end
 					elseif (Enum == 2) then
-						Stk[Inst[2]]();
-					else
-						Stk[Inst[2]] = Inst[3];
-					end
-				elseif (Enum <= 5) then
-					if (Enum > 4) then
-						do
-							return;
-						end
-					else
 						local A = Inst[2];
 						local B = Stk[Inst[3]];
 						Stk[A + 1] = B;
 						Stk[A] = B[Inst[4]];
+					else
+						Stk[Inst[2]] = Inst[3];
+					end
+				elseif (Enum <= 5) then
+					if (Enum == 4) then
+						Stk[Inst[2]] = Env[Inst[3]];
+					else
+						do
+							return;
+						end
 					end
 				elseif (Enum > 6) then
+					local A = Inst[2];
+					Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+				else
 					local Edx;
 					local Results, Limit;
 					local B;
@@ -261,8 +263,6 @@ local function VMCall(ByteString, vmenv, ...)
 					do
 						return;
 					end
-				else
-					Stk[Inst[2]] = Env[Inst[3]];
 				end
 				VIP = VIP + 1;
 			end
@@ -270,4 +270,4 @@ local function VMCall(ByteString, vmenv, ...)
 	end
 	return Wrap(Deserialize(), {}, vmenv)(...);
 end
-return VMCall("LOL!043Q00030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403213Q00682Q7470733A2Q2F706173746562696E2E636F6D2F7261772F3865477A395A527200083Q0012073Q00013Q00122Q000100023Q00202Q00010001000300122Q000300046Q000100039Q0000026Q000100016Q00017Q00", GetFEnv(), ...);
+return VMCall("LOL!043Q00030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403213Q00682Q7470733A2Q2F706173746562696E2E636F6D2F7261772F4A73785254764D5100083Q0012063Q00013Q00122Q000100023Q00202Q00010001000300122Q000300046Q000100039Q0000026Q000100016Q00017Q00", GetFEnv(), ...);
