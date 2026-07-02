@@ -3,1186 +3,1673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تعلم Lua - المحرر التفاعلي</title>
+    <title>Roblox Scripts Hub - سكربتات روبلوكس الاحترافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+        :root {
+            --primary: #00d4ff;
+            --primary-dark: #0099cc;
+            --secondary: #ff6b35;
+            --accent: #7c3aed;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6b6b7b;
+            --border: #2a2a3a;
+            --success: #00e676;
+            --warning: #ffc107;
+            --danger: #ff1744;
+            --gradient-1: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+            --gradient-2: linear-gradient(135deg, #ff6b35 0%, #ff1744 100%);
+            --shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+            --shadow-lg: 0 20px 60px rgba(0, 212, 255, 0.2);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Cairo', sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; overflow: hidden; }
-        .container { display: flex; height: 100vh; }
-        .sidebar { width: 280px; background: #1e293b; border-left: 1px solid #334155; overflow-y: auto; padding: 20px; }
-        .sidebar h1 { color: #fbbf24; font-size: 24px; margin-bottom: 5px; text-align: center; }
-        .sidebar .subtitle { color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 20px; }
-        .lesson-section { margin-bottom: 15px; }
-        .lesson-section h3 { color: #38bdf8; font-size: 14px; margin-bottom: 8px; padding: 8px 12px; background: #334155; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .lesson-section h3:hover { background: #475569; }
-        .lesson-section h3 .arrow { transition: transform 0.3s; }
-        .lesson-section.collapsed h3 .arrow { transform: rotate(-90deg); }
-        .lesson-section.collapsed .lesson-list { display: none; }
-        .lesson-list { list-style: none; padding-right: 10px; }
-        .lesson-list li { padding: 8px 12px; margin: 4px 0; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.2s; color: #cbd5e1; }
-        .lesson-list li:hover { background: #334155; color: #fbbf24; }
-        .lesson-list li.active { background: #0ea5e9; color: white; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar { background: #1e293b; padding: 12px 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .top-bar h2 { color: #fbbf24; font-size: 16px; }
-        .run-btn { background: #22c55e; color: white; border: none; padding: 8px 20px; border-radius: 8px; font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .run-btn:hover { background: #16a34a; transform: translateY(-1px); }
-        .editor-area { flex: 1; display: flex; overflow: hidden; }
-        .editor-panel { flex: 1; display: flex; flex-direction: column; border-left: 1px solid #334155; min-width: 0; }
-        .panel-header { background: #1e293b; padding: 6px 12px; font-size: 11px; color: #94a3b8; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px; }
-        .panel-header .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .dot.green { background: #22c55e; }
-        .dot.orange { background: #f59e0b; }
-        .dot.purple { background: #a855f7; }
-        .code-editor { flex: 1; background: #0f172a; color: #e2e8f0; font-family: 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 1.6; padding: 12px; border: none; outline: none; resize: none; direction: ltr; text-align: left; }
-        .output-panel { flex: 1; display: flex; flex-direction: column; background: #0f172a; min-width: 0; }
-        .output-content { flex: 1; padding: 12px; font-family: 'Fira Code', 'Consolas', monospace; font-size: 12px; line-height: 1.6; overflow-y: auto; direction: ltr; text-align: left; }
-        .output-line { margin: 2px 0; padding: 2px 0; }
-        .output-line.input { color: #38bdf8; }
-        .output-line.output { color: #22c55e; }
-        .output-line.error { color: #ef4444; }
-        .output-line.info { color: #94a3b8; }
-        .visual-panel { flex: 1; display: flex; flex-direction: column; background: #0f172a; border-left: 1px solid #334155; min-width: 0; }
-        .visual-content { flex: 1; padding: 12px; overflow-y: auto; }
-        .visual-box { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
-        .visual-box-title { color: #fbbf24; font-size: 11px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .visual-var { display: flex; align-items: center; gap: 8px; padding: 4px 8px; background: #0f172a; border-radius: 4px; margin: 3px 0; font-size: 12px; }
-        .visual-var-name { color: #38bdf8; font-weight: 600; }
-        .visual-var-type { color: #94a3b8; font-size: 10px; background: #334155; padding: 1px 6px; border-radius: 3px; }
-        .visual-var-value { color: #22c55e; margin-right: auto; }
-        .visual-code-line { padding: 2px 0; font-family: 'Fira Code', monospace; font-size: 12px; }
-        .kw { color: #c678dd; } /* keyword */
-        .func { color: #61afef; } /* function */
-        .str { color: #98c379; } /* string */
-        .num { color: #d19a66; } /* number */
-        .cm { color: #5c6370; font-style: italic; } /* comment */
-        .var { color: #e06c75; } /* variable */
-        .op { color: #56b6c2; } /* operator */
-        .lesson-content { background: #1e293b; padding: 15px 20px; border-bottom: 1px solid #334155; max-height: 180px; overflow-y: auto; }
-        .lesson-content h3 { color: #fbbf24; margin-bottom: 8px; font-size: 15px; }
-        .lesson-content p { color: #cbd5e1; line-height: 1.8; font-size: 13px; }
-        .lesson-content code { background: #334155; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; color: #fbbf24; }
-        .examples { margin-top: 8px; }
-        .example-btn { background: #334155; color: #e2e8f0; border: 1px solid #475569; padding: 5px 10px; border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 11px; cursor: pointer; margin: 2px; transition: all 0.2s; }
-        .example-btn:hover { background: #475569; border-color: #38bdf8; color: #38bdf8; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        .clear-btn { background: #ef4444; color: white; border: none; padding: 5px 12px; border-radius: 6px; font-family: 'Cairo', sans-serif; font-size: 11px; cursor: pointer; margin-right: 8px; }
-        .clear-btn:hover { background: #dc2626; }
-        .visual-flow { display: flex; flex-direction: column; gap: 4px; }
-        .flow-step { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #0f172a; border-radius: 6px; border-right: 3px solid #38bdf8; }
-        .flow-step-num { background: #38bdf8; color: #0f172a; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
-        .flow-step-text { font-size: 11px; color: #cbd5e1; }
-        .flow-arrow { text-align: center; color: #475569; font-size: 14px; }
-        .visual-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        .visual-table th { background: #334155; color: #fbbf24; padding: 4px 8px; text-align: left; }
-        .visual-table td { background: #0f172a; padding: 4px 8px; border-top: 1px solid #334155; }
-        .visual-empty { color: #475569; text-align: center; padding: 20px; font-size: 12px; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        .particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+        nav.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: var(--shadow);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo i {
+            font-size: 2rem;
+            color: var(--primary);
+            -webkit-text-fill-color: var(--primary);
+        }
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-links a:hover { color: var(--primary); }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; right: 0;
+            width: 0; height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-secondary {
+            background: var(--gradient-2);
+            color: white;
+        }
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            transition: color 0.3s;
+        }
+        .cart-icon:hover { color: var(--primary); }
+        .cart-count {
+            position: absolute;
+            top: -8px; right: -8px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.03) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 0.5rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+        .hero h1 span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease 0.6s both;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 4rem;
+            animation: fadeInUp 0.8s ease 0.8s both;
+        }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        section { padding: 6rem 2rem; position: relative; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .section-header h2 span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        .feature-card:hover::before { transform: scaleX(1); }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: var(--shadow-lg);
+        }
+        .feature-icon {
+            width: 60px; height: 60px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+        }
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .scripts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        .script-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .script-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+        .script-image {
+            height: 200px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .script-image::before {
+            content: '';
+            position: absolute;
+            width: 150px; height: 150px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            opacity: 0.1;
+            filter: blur(40px);
+        }
+        .script-image i {
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.8;
+        }
+        .script-badge {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .badge-new { background: var(--success); color: #000; }
+        .badge-hot { background: var(--secondary); color: #fff; }
+        .badge-premium { background: var(--accent); color: #fff; }
+        .script-content { padding: 1.5rem; }
+        .script-category {
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .script-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .script-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .script-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .script-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .script-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .script-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .script-price .old-price {
+            font-size: 1rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+            margin-right: 0.5rem;
+        }
+        .btn-add-cart {
+            padding: 0.6rem 1.2rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .btn-add-cart:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+        }
+
+        .tutorials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .tutorial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .tutorial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+        .tutorial-thumbnail {
+            height: 180px;
+            background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .play-btn {
+            width: 60px; height: 60px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(0, 212, 255, 0.5);
+        }
+        .play-btn i {
+            color: white;
+            font-size: 1.2rem;
+            margin-left: 4px;
+        }
+        .tutorial-duration {
+            position: absolute;
+            bottom: 1rem; left: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .tutorial-content { padding: 1.5rem; }
+        .tutorial-level {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .level-beginner { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+        .level-intermediate { background: rgba(255, 193, 7, 0.15); color: var(--warning); }
+        .level-advanced { background: rgba(255, 23, 68, 0.15); color: var(--danger); }
+        .tutorial-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .tutorial-info {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .membership-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            align-items: start;
+        }
+        .membership-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        .membership-card.featured {
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+        .membership-card.featured::before {
+            content: 'الأكثر شعبية';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.35rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .membership-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+        .membership-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        .membership-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .membership-price {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        .membership-price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .membership-features {
+            list-style: none;
+            margin: 2rem 0;
+        }
+        .membership-features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-secondary);
+        }
+        .membership-features li i { color: var(--success); }
+        .membership-features li.not-included { color: var(--text-muted); }
+        .membership-features li.not-included i { color: var(--danger); }
+
+        .support-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .support-info h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .support-info h2 span {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .support-info p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        .support-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .support-method {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .support-method:hover {
+            border-color: var(--primary);
+            transform: translateX(-5px);
+        }
+        .support-method-icon {
+            width: 50px; height: 50px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        .support-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+        }
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem; right: 1.5rem;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.2;
+            font-family: serif;
+        }
+        .testimonial-text {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .author-avatar {
+            width: 50px; height: 50px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+        .author-info h4 { font-weight: 700; }
+        .author-info span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .stars {
+            color: var(--warning);
+            margin-bottom: 1rem;
+        }
+
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 4rem 2rem 2rem;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .footer-brand .logo {
+            margin-bottom: 1rem;
+            -webkit-text-fill-color: var(--primary);
+        }
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+        .footer-links h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        .footer-links ul { list-style: none; }
+        .footer-links li { margin-bottom: 0.75rem; }
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover { color: var(--primary); }
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .social-links a {
+            width: 40px; height: 40px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+        }
+        .social-links a:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border-color: var(--primary);
+        }
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h3 { font-size: 1.5rem; }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .modal-close:hover { color: var(--danger); }
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .cart-item-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        .cart-item-info p {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 2rem; left: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 3000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .notification i {
+            color: var(--success);
+            font-size: 1.2rem;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1024px) {
+            .support-container { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero-stats { gap: 2rem; }
+            .membership-card.featured { transform: scale(1); }
+            .membership-card.featured:hover { transform: translateY(-10px); }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
     </style>
+<base target="_blank">
 </head>
 <body>
-    <div class="container">
-        <div class="sidebar">
-            <h1>🌙 Lua</h1>
-            <div class="subtitle">المحرر التفاعلي لتعلم Lua</div>
-            <div class="lesson-section" data-section="control">
-                <h3>🔀 التحكم <span class="arrow">▼</span></h3>
-                <ul class="lesson-list">
-                    <li data-lesson="if">if / else</li>
-                    <li data-lesson="loops">الحلقات (for, while)</li>
-                    <li data-lesson="tables">الجداول (Tables)</li>
-                    <li data-lesson="functions">الدوال (Functions)</li>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                Roblox Scripts Hub
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#scripts">السكربتات</a></li>
+                <li><a href="#tutorials">الدروس</a></li>
+                <li><a href="#memberships">العضويات</a></li>
+                <li><a href="#support">الدعم</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="cart-icon" onclick="openCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </div>
+                <button class="btn btn-outline">تسجيل الدخول</button>
+                <button class="btn btn-primary">إنشاء حساب</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i>
+                أكثر من 500+ سكربت احترافي
+            </div>
+            <h1>
+                سكربتات <span>Roblox</span><br>
+                احترافية بأعلى جودة
+            </h1>
+            <p>
+                احصل على أفضل سكربتات Lua لألعاب Roblox مع دعم فني ممتاز،
+                دروس برمجية متكاملة، ونظام عضويات يمنحك وصولاً غير محدود
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="scrollToSection('scripts')">
+                    <i class="fas fa-rocket"></i>
+                    تصفح السكربتات
+                </button>
+                <button class="btn btn-outline" onclick="scrollToSection('tutorials')">
+                    <i class="fas fa-play-circle"></i>
+                    شاهد الدروس
+                </button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">سكربت جاهز</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">عميل سعيد</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">درس برمجي</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">دعم فني</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>لماذا تختار <span>منصتنا</span>؟</h2>
+                <p>نقدم لك تجربة فريدة في عالم سكربتات Roblox مع مميزات حصرية</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>سكربتات آمنة 100%</h3>
+                    <p>جميع السكربتات مختبرة ومأمونة، خالية من الفيروسات والأكواد الضارة مع ضمان استرداد كامل</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>تحديثات مستمرة</h3>
+                    <p>نحدث السكربتات باستمرار لتتوافق مع آخر تحديثات Roblox ونضمن عملها بكفاءة</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                    <h3>دعم فني على مدار الساعة</h3>
+                    <p>فريق دعم متخصص جاهز لمساعدتك في أي وقت عبر الدردشة المباشرة أو التذاكر</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>دروس احترافية</h3>
+                    <p>تعلم برمجة Lua من الصفر حتى الاحتراف مع دروس مرئية ومشاريع عملية</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-crown"></i></div>
+                    <h3>نظام عضويات مميز</h3>
+                    <p>احصل على وصول غير محدود لجميع السكربتات والدروس مع العضوية المميزة</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon"><i class="fas fa-download"></i></div>
+                    <h3>تنزيل فوري</h3>
+                    <p>احصل على السكربتات فوراً بعد الدفع مع دليل استخدام مفصل لكل سكربت</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts Section -->
+    <section id="scripts" style="background: rgba(0,0,0,0.2);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>أحدث <span>السكربتات</span></h2>
+                <p>اختر من مجموعتنا الواسعة من السكربتات الاحترافية لألعاب Roblox</p>
+            </div>
+            <div class="scripts-grid">
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-crosshairs"></i>
+                        <span class="script-badge badge-hot">الأكثر مبيعاً</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">أدوات اللاعب</div>
+                        <h3 class="script-title">Aimbot Pro - نظام التصويب الذكي</h3>
+                        <p class="script-desc">نظام تصويب ذكي متقدم مع دعم Silent Aim، FOV مخصص، واختيار الأعضاء المستهدفة</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 2.5K</span>
+                            <span><i class="fas fa-star"></i> 4.9</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$29.99</span>$19.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('Aimbot Pro', 19.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-eye"></i>
+                        <span class="script-badge badge-new">جديد</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">ESP & Visuals</div>
+                        <h3 class="script-title">ESP Master - رؤية اللاعبين</h3>
+                        <p class="script-desc">رؤية كاملة لجميع اللاعبين مع معلومات تفصيلية: الاسم، الصحة، المسافة، والأسلحة</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 1.8K</span>
+                            <span><i class="fas fa-star"></i> 4.8</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$24.99</span>$14.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('ESP Master', 14.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-running"></i>
+                        <span class="script-badge badge-premium">بريميوم</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">Movement</div>
+                        <h3 class="script-title">Speed & Fly Hub - حركة متقدمة</h3>
+                        <p class="script-desc">تحكم كامل في حركة اللاعب: سرعة خارقة، طيران، قفز عالي، وNoClip مع واجهة سهلة</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 3.2K</span>
+                            <span><i class="fas fa-star"></i> 4.7</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$34.99</span>$24.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('Speed & Fly Hub', 24.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-robot"></i>
+                        <span class="script-badge badge-new">جديد</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">Automation</div>
+                        <h3 class="script-title">Auto Farm Pro - تجميع آلي</h3>
+                        <p class="script-desc">نظام تجميع آلي ذكي لمعظم ألعاب Roblox الشعبية مع دعم Anti-AFK ونظام إحصائيات</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 4.1K</span>
+                            <span><i class="fas fa-star"></i> 4.9</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$39.99</span>$29.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('Auto Farm Pro', 29.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-gamepad"></i>
+                        <span class="script-badge badge-hot">الأكثر مبيعاً</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">Game Hub</div>
+                        <h3 class="script-title">Universal Hub - سكربت شامل</h3>
+                        <p class="script-desc">سكربت شامل يعمل على معظم ألعاب Roblox مع واجهة رسومية احترافية ومميزات متعددة</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 5.5K</span>
+                            <span><i class="fas fa-star"></i> 5.0</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$49.99</span>$34.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('Universal Hub', 34.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="script-card fade-in">
+                    <div class="script-image">
+                        <i class="fas fa-magic"></i>
+                        <span class="script-badge badge-premium">بريميوم</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-category">GUI & UI</div>
+                        <h3 class="script-title">Custom GUI Builder - منشئ واجهات</h3>
+                        <p class="script-desc">أنشئ واجهات مستخدم احترافية لسكربتاتك مع مكتبة عناصر جاهزة وتصميمات قابلة للتخصيص</p>
+                        <div class="script-meta">
+                            <span><i class="fas fa-download"></i> 980</span>
+                            <span><i class="fas fa-star"></i> 4.6</span>
+                            <span><i class="fas fa-code"></i> Lua</span>
+                        </div>
+                        <div class="script-footer">
+                            <div class="script-price"><span class="old-price">$44.99</span>$34.99</div>
+                            <button class="btn-add-cart" onclick="addToCart('Custom GUI Builder', 34.99)"><i class="fas fa-cart-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 3rem;">
+                <button class="btn btn-primary"><i class="fas fa-th-large"></i> عرض جميع السكربتات</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tutorials Section -->
+    <section id="tutorials">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>دروس <span>البرمجة</span></h2>
+                <p>تعلم برمجة Lua لـ Roblox من الصفر حتى الاحتراف</p>
+            </div>
+            <div class="tutorials-grid">
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">45 دقيقة</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-beginner">مبتدئ</span>
+                        <h3 class="tutorial-title">مقدمة في برمجة Lua لـ Roblox</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> أحمد المبرمج</span>
+                            <span><i class="fas fa-eye"></i> 12K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">1 ساعة 20 د</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-intermediate">متوسط</span>
+                        <h3 class="tutorial-title">بناء نظام ESP كامل من الصفر</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> خالد التقني</span>
+                            <span><i class="fas fa-eye"></i> 8.5K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">2 ساعة</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-advanced">متقدم</span>
+                        <h3 class="tutorial-title">تطوير Aimbot احترافي مع Silent Aim</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> محمد الخبير</span>
+                            <span><i class="fas fa-eye"></i> 6.2K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">55 دقيقة</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-intermediate">متوسط</span>
+                        <h3 class="tutorial-title">تصميم واجهات GUI احترافية</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> سارة المطورة</span>
+                            <span><i class="fas fa-eye"></i> 9.1K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">1 ساعة 45 د</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-advanced">متقدم</span>
+                        <h3 class="tutorial-title">نظام Anti-Cheat وتجاوز الحماية</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> يوسف الأمني</span>
+                            <span><i class="fas fa-eye"></i> 4.8K</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-card fade-in">
+                    <div class="tutorial-thumbnail">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                        <span class="tutorial-duration">30 دقيقة</span>
+                    </div>
+                    <div class="tutorial-content">
+                        <span class="tutorial-level level-beginner">مبتدئ</span>
+                        <h3 class="tutorial-title">أدوات التطوير الأساسية وإعداد البيئة</h3>
+                        <div class="tutorial-info">
+                            <span><i class="fas fa-user"></i> أحمد المبرمج</span>
+                            <span><i class="fas fa-eye"></i> 15K</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Memberships Section -->
+    <section id="memberships" style="background: rgba(0,0,0,0.2);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>خطط <span>العضوية</span></h2>
+                <p>اختر العضوية المناسبة لاحتياجاتك ووفر أكثر</p>
+            </div>
+            <div class="membership-grid">
+                <div class="membership-card fade-in">
+                    <h3 class="membership-name">المجانية</h3>
+                    <p style="color: var(--text-muted);">للمبتدئين</p>
+                    <div class="membership-price">$0 <span>/شهر</span></div>
+                    <ul class="membership-features">
+                        <li><i class="fas fa-check"></i> 5 سكربتات مجانية</li>
+                        <li><i class="fas fa-check"></i> وصول للدروس المجانية</li>
+                        <li><i class="fas fa-check"></i> دعم فني عبر المنتدى</li>
+                        <li><i class="fas fa-check"></i> تحديثات شهرية</li>
+                        <li class="not-included"><i class="fas fa-times"></i> سكربتات بريميوم</li>
+                        <li class="not-included"><i class="fas fa-times"></i> دروس متقدمة</li>
+                        <li class="not-included"><i class="fas fa-times"></i> دعم فني مباشر</li>
+                    </ul>
+                    <button class="btn btn-outline" style="width: 100%;">ابدأ مجاناً</button>
+                </div>
+
+                <div class="membership-card featured fade-in">
+                    <h3 class="membership-name">الاحترافية</h3>
+                    <p style="color: var(--text-muted);">للمطورين الجادين</p>
+                    <div class="membership-price">$19.99 <span>/شهر</span></div>
+                    <ul class="membership-features">
+                        <li><i class="fas fa-check"></i> وصول غير محدود لجميع السكربتات</li>
+                        <li><i class="fas fa-check"></i> جميع الدروس المتقدمة</li>
+                        <li><i class="fas fa-check"></i> دعم فني مباشر 24/7</li>
+                        <li><i class="fas fa-check"></i> تحديثات أسبوعية</li>
+                        <li><i class="fas fa-check"></i> سكربتات حصرية</li>
+                        <li><i class="fas fa-check"></i> خصم 20% على السكربتات الفردية</li>
+                        <li class="not-included"><i class="fas fa-times"></i> طلبات سكربتات مخصصة</li>
+                    </ul>
+                    <button class="btn btn-primary" style="width: 100%;">اشترك الآن</button>
+                </div>
+
+                <div class="membership-card fade-in">
+                    <h3 class="membership-name">البريميوم</h3>
+                    <p style="color: var(--text-muted);">للفرق والمحترفين</p>
+                    <div class="membership-price">$49.99 <span>/شهر</span></div>
+                    <ul class="membership-features">
+                        <li><i class="fas fa-check"></i> كل مميزات الاحترافية</li>
+                        <li><i class="fas fa-check"></i> طلبات سكربتات مخصصة</li>
+                        <li><i class="fas fa-check"></i> جلسات تعليمية خاصة</li>
+                        <li><i class="fas fa-check"></i> أولوية في الدعم الفني</li>
+                        <li><i class="fas fa-check"></i> وصول مبكر للسكربتات الجديدة</li>
+                        <li><i class="fas fa-check"></i> خصم 40% على السكربتات الفردية</li>
+                        <li><i class="fas fa-check"></i> API خاص للوصول</li>
+                    </ul>
+                    <button class="btn btn-secondary" style="width: 100%;">تواصل معنا</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support">
+        <div class="container">
+            <div class="support-container">
+                <div class="support-info fade-in">
+                    <h2>دعم فني <span>على مدار الساعة</span></h2>
+                    <p>فريقنا المتخصص جاهز لمساعدتك في أي استفسار أو مشكلة تواجهك. نحن نؤمن بأن نجاحك هو نجاحنا.</p>
+                    <div class="support-methods">
+                        <div class="support-method">
+                            <div class="support-method-icon"><i class="fas fa-comments"></i></div>
+                            <div>
+                                <h4>دردشة مباشرة</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">رد فوري خلال دقائق</p>
+                            </div>
+                        </div>
+                        <div class="support-method">
+                            <div class="support-method-icon"><i class="fas fa-ticket-alt"></i></div>
+                            <div>
+                                <h4>نظام التذاكر</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">تتبع حالة طلبك</p>
+                            </div>
+                        </div>
+                        <div class="support-method">
+                            <div class="support-method-icon"><i class="fab fa-discord"></i></div>
+                            <div>
+                                <h4>سيرفر Discord</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">مجتمع نشط من المطورين</p>
+                            </div>
+                        </div>
+                        <div class="support-method">
+                            <div class="support-method-icon"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <h4>البريد الإلكتروني</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">support@robloxscripts.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="support-form fade-in">
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem;">أرسل لنا رسالة</h3>
+                    <form onsubmit="submitSupport(event)">
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" placeholder="أدخل اسمك" required>
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>نوع الاستفسار</label>
+                            <select required>
+                                <option value="">اختر نوع الاستفسار</option>
+                                <option value="technical">مشكلة تقنية</option>
+                                <option value="purchase">استفسار عن شراء</option>
+                                <option value="refund">طلب استرداد</option>
+                                <option value="custom">طلب سكربت مخصص</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الرسالة</label>
+                            <textarea placeholder="اشرح مشكلتك بالتفصيل..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane"></i> إرسال الرسالة
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section style="background: rgba(0,0,0,0.2);">
+        <div class="container">
+            <div class="section-header fade-in">
+                <h2>آراء <span>عملائنا</span></h2>
+                <p>شاهد ما يقوله مطورو Roblox عن خدماتنا</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card fade-in">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">أفضل منصة لشراء سكربتات Roblox! السكربتات عالية الجودة والدعم الفني رائع. أنصح بشدة بالعضوية الاحترافية.</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">عم</div>
+                        <div class="author-info">
+                            <h4>عمر المطور</h4>
+                            <span>مطور Roblox محترف</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">الدروس البرمجية ممتازة! تعلمت Lua من الصفر وأصبحت أطور سكربتاتي الخاصة بفضل الدروس المفصلة والمشاريع العملية.</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">سع</div>
+                        <div class="author-info">
+                            <h4>سعيد المبرمج</h4>
+                            <span>مطور ألعاب مستقل</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card fade-in">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="testimonial-text">سكربتات Universal Hub رائعة وتحديثاتها مستمرة. فريق الدعم ساعدني في حل مشكلة معقدة خلال ساعة واحدة فقط.</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">فا</div>
+                        <div class="author-info">
+                            <h4>فهد التقني</h4>
+                            <span>صانع محتوى Roblox</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="logo"><i class="fas fa-code"></i> Roblox Scripts Hub</div>
+                <p>منصتك الأولى لسكربتات Roblox الاحترافية. نقدم سكربتات عالية الجودة، دروس برمجية، ودعم فني ممتاز لمساعدتك في تطوير ألعابك.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#scripts">السكربتات</a></li>
+                    <li><a href="#tutorials">الدروس</a></li>
+                    <li><a href="#memberships">العضويات</a></li>
                 </ul>
             </div>
-            <div class="lesson-section" data-section="strings">
-                <h3>📝 النصوص <span class="arrow">▼</span></h3>
-                <ul class="lesson-list">
-                    <li data-lesson="strings-basics">أساسيات النصوص</li>
-                    <li data-lesson="string-functions">دوال النصوص</li>
-                    <li data-lesson="string-format">تنسيق النصوص</li>
-                    <li data-lesson="string-patterns">الأنماط (Patterns)</li>
+            <div class="footer-links">
+                <h4>الدعم</h4>
+                <ul>
+                    <li><a href="#support">مركز المساعدة</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                    <li><a href="#">سياسة الاسترداد</a></li>
+                    <li><a href="#">شروط الاستخدام</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>تواصل معنا</h4>
+                <ul>
+                    <li><a href="#">support@robloxscripts.com</a></li>
+                    <li><a href="#">Discord Server</a></li>
+                    <li><a href="#">@RobloxScriptsHub</a></li>
                 </ul>
             </div>
         </div>
-        <div class="main-content">
-            <div class="lesson-content" id="lessonContent">
-                <h3>👋 أهلاً بك في محرر Lua التفاعلي!</h3>
-                <p>اختر درس من الشريط الجانبي لتبدأ التعلم. اكتب كود Lua في المحرر واضغط ▶️ تشغيل لتشغيله.</p>
-                <div class="examples">
-                    <button class="example-btn" onclick="loadExample('hello')">👋 Hello World</button>
-                    <button class="example-btn" onclick="loadExample('variables')">📦 متغيرات</button>
-                    <button class="example-btn" onclick="loadExample('math')">🔢 رياضيات</button>
-                    <button class="example-btn" onclick="loadExample('table')">📊 جدول</button>
-                    <button class="example-btn" onclick="loadExample('function')">⚙️ دالة</button>
-                    <button class="example-btn" onclick="loadExample('loop')">🔄 حلقة</button>
-                    <button class="example-btn" onclick="loadExample('ifelse')">❓ if/else</button>
-                    <button class="example-btn" onclick="loadExample('string')">📝 نصوص</button>
-                </div>
-            </div>
-            <div class="top-bar">
-                <h2 id="currentLesson">محرر Lua التفاعلي</h2>
-                <div>
-                    <button class="clear-btn" onclick="clearOutput()">🗑️ مسح</button>
-                    <button class="run-btn" onclick="runCode()"><span>▶️</span> تشغيل</button>
-                </div>
-            </div>
-            <div class="editor-area">
-                <div class="editor-panel">
-                    <div class="panel-header"><span class="dot green"></span>main.lua</div>
-                    <textarea class="code-editor" id="codeEditor" spellcheck="false" placeholder="-- اكتب كود Lua هنا...">-- مرحباً! اكتب كود Lua هنا
--- اضغط على ▶️ تشغيل لتشغيل الكود
+        <div class="footer-bottom">
+            <p>Roblox Scripts Hub &copy; 2026. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
 
-print("Hello, World!")
-print("مرحباً بك في Lua!")</textarea>
-                </div>
-                <div class="output-panel">
-                    <div class="panel-header"><span class="dot orange"></span>النتائج (Output)</div>
-                    <div class="output-content" id="output">
-                        <div class="output-line info">🚀 جاهز لتشغيل الكود...</div>
-                        <div class="output-line info">─────────────────────────</div>
-                    </div>
-                </div>
-                <div class="visual-panel">
-                    <div class="panel-header"><span class="dot purple"></span>🔍 تصور السكربت</div>
-                    <div class="visual-content" id="visualOutput">
-                        <div class="visual-empty">🎨 اضغط "تشغيل" لرؤية تصور السكربت</div>
-                    </div>
-                </div>
+    <!-- Cart Modal -->
+    <div class="modal-overlay" id="cartModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> سلة المشتريات</h3>
+                <button class="modal-close" onclick="closeCart()">&times;</button>
             </div>
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <span>المجموع:</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="checkout()">
+                <i class="fas fa-credit-card"></i> إتمام الشراء
+            </button>
         </div>
     </div>
 
-<script>
-const lessons = {
-    if: { title: "if / else", content: `<h3>❓ الجمل الشرطية</h3><p>الهيكل: <code>if condition then ... elseif ... then ... else ... end</code></p><p>عوامل المقارنة: <code>==</code> <code>~=</code> <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code></p><div class="examples"><button class="example-btn" onclick="loadExample('ifelse')">❓ أمثلة if/else</button><button class="example-btn" onclick="loadExample('ifelse2')">❓ if/else متقدم</button></div>` },
-    loops: { title: "الحلقات", content: `<h3>🔄 الحلقات في Lua</h3><p><code>for i = 1, 10 do ... end</code> — حلقة for رقمية</p><p><code>while condition do ... end</code> — حلقة while</p><p><code>repeat ... until condition</code> — حلقة repeat</p><div class="examples"><button class="example-btn" onclick="loadExample('loop')">🔄 أمثلة حلقات</button><button class="example-btn" onclick="loadExample('forpairs')">🔄 for pairs</button><button class="example-btn" onclick="loadExample('while')">🔄 while loop</button></div>` },
-    tables: { title: "الجداول (Tables)", content: `<h3>📊 الجداول في Lua</h3><p>الجدول هو الهيكل الوحيد للبيانات في Lua. يستخدم كـ: مصفوفة، قاموس، كائن، قائمة.</p><p><code>local t = {}</code> — جدول فارغ</p><p><code>t[1] = "value"</code> أو <code>t.key = "value"</code></p><div class="examples"><button class="example-btn" onclick="loadExample('table')">📊 أمثلة جداول</button><button class="example-btn" onclick="loadExample('table2')">📊 جداول متقدمة</button><button class="example-btn" onclick="loadExample('table3')">📊 جداول ثنائية</button></div>` },
-    functions: { title: "الدوال (Functions)", content: `<h3>⚙️ الدوال في Lua</h3><p><code>function name(param) ... return value end</code></p><p>الدوال هي first-class citizens — يمكن تمريرها كمتغيرات وإرجاعها.</p><div class="examples"><button class="example-btn" onclick="loadExample('function')">⚙️ أمثلة دوال</button><button class="example-btn" onclick="loadExample('function2')">⚙️ دوال متقدمة</button><button class="example-btn" onclick="loadExample('function3')">⚙️ دوال متغيرة</button></div>` },
-    'strings-basics': { title: "أساسيات النصوص", content: `<h3>📝 أساسيات النصوص في Lua</h3><p>يمكن تعريف النصوص بـ: <code>"نص"</code> أو <code>'نص'</code> أو <code>[[نص متعدد الأسطر]]</code></p><p>دمج النصوص: <code>..</code> — طول النص: <code>#</code></p><div class="examples"><button class="example-btn" onclick="loadExample('string')">📝 أمثلة نصوص</button><button class="example-btn" onclick="loadExample('string2')">📝 نصوص متعددة</button></div>` },
-    'string-functions': { title: "دوال النصوص", content: `<h3>🔤 دوال النصوص في Lua</h3><p><code>string.upper()</code> — <code>string.lower()</code> — <code>string.len()</code></p><p><code>string.sub()</code> — <code>string.find()</code> — <code>string.gsub()</code></p><div class="examples"><button class="example-btn" onclick="loadExample('stringfuncs')">🔤 دوال النصوص</button><button class="example-btn" onclick="loadExample('stringfind')">🔤 البحث والاستبدال</button></div>` },
-    'string-format': { title: "تنسيق النصوص", content: `<h3>📋 تنسيق النصوص في Lua</h3><p><code>string.format("%s", name)</code> — تنسيق بـ %s, %d, %f</p><p><code>string.format("%.2f", 3.14159)</code> — عدد عشري بمنزلتين</p><div class="examples"><button class="example-btn" onclick="loadExample('stringformat')">📋 تنسيق النصوص</button></div>` },
-    'string-patterns': { title: "الأنماط (Patterns)", content: `<h3>🔍 الأنماط في Lua</h3><p>Lua تستخدم patterns مش regex:</p><p><code>%a</code> حرف — <code>%d</code> رقم — <code>%s</code> مسافة — <code>%w</code> حرف أو رقم</p><div class="examples"><button class="example-btn" onclick="loadExample('patterns')">🔍 أمثلة Patterns</button></div>` }
-};
-
-const examples = {
-    hello: `-- Hello World!
-print("Hello, World!")
-print("مرحباً بك في Lua!")`,
-    variables: `-- المتغيرات في Lua
-local name = "Ali"
-local age = 20
-local isStudent = true
-
-print("الاسم: " .. name)
-print("العمر: " .. age)
-print("طالب: " .. tostring(isStudent))`,
-    math: `-- العمليات الرياضية
-local x = 10
-local y = 3
-
-print("x + y = " .. (x + y))
-print("x - y = " .. (x - y))
-print("x * y = " .. (x * y))
-print("x / y = " .. (x / y))
-print("x ^ y = " .. (x ^ y))
-print("x % y = " .. (x % y))`,
-    table: `-- الجداول في Lua
-local fruits = {"تفاح", "موز", "برتقال"}
-print(fruits[1])
-print(fruits[2])
-
-local student = {
-    name = "محمد",
-    grade = 95,
-    subjects = {"رياضيات", "فيزياء", "برمجة"}
-}
-
-print("الطالب: " .. student.name)
-print("الدرجة: " .. student.grade)`,
-    table2: `-- جداول متقدمة
-local matrix = {
-    {1, 2, 3},
-    {4, 5, 6},
-    {7, 8, 9}
-}
-
-print("العنصر [2][3] = " .. matrix[2][3])
-
-local calculator = {
-    add = function(a, b) return a + b end,
-    subtract = function(a, b) return a - b end
-}
-
-print("5 + 3 = " .. calculator.add(5, 3))`,
-    table3: `-- جداول ثنائية (2D)
-local board = {}
-for i = 1, 3 do
-    board[i] = {}
-    for j = 1, 3 do
-        board[i][j] = i * j
-    end
-end
-
-for i = 1, 3 do
-    local row = ""
-    for j = 1, 3 do
-        row = row .. board[i][j] .. " "
-    end
-    print(row)
-end`,
-    function: `-- الدوال في Lua
-function greet(name)
-    return "مرحباً، " .. name .. "!"
-end
-
-print(greet("أحمد"))
-print(greet("فاطمة"))
-
-function power(base, exponent)
-    exponent = exponent or 2
-    return base ^ exponent
-end
-
-print("2^3 = " .. power(2, 3))
-print("5^2 = " .. power(5))`,
-    function2: `-- دوال متقدمة
-function makeMultiplier(factor)
-    return function(number)
-        return number * factor
-    end
-end
-
-local double = makeMultiplier(2)
-local triple = makeMultiplier(3)
-
-print("double 5 = " .. double(5))
-print("triple 4 = " .. triple(4))`,
-    function3: `-- دوال متغيرة (Variadic)
-function sum(...)
-    local total = 0
-    for _, v in ipairs({...}) do
-        total = total + v
-    end
-    return total
-end
-
-print("sum(1,2,3,4,5) = " .. sum(1, 2, 3, 4, 5))
-print("sum(10,20) = " .. sum(10, 20))`,
-    ifelse: `-- الجمل الشرطية
-local score = 85
-
-if score >= 90 then
-    print("ممتاز! A")
-elseif score >= 80 then
-    print("جيد جداً! B")
-elseif score >= 70 then
-    print("جيد! C")
-else
-    print("يحتاج تحسين")
-end
-
-local hasMoney = true
-local hasTime = false
-
-if hasMoney and hasTime then
-    print("يمكنك السفر!")
-else
-    print("لا يمكنك السفر الآن")
-end`,
-    ifelse2: `-- if/else متقدم
-local age = 25
-local hasLicense = true
-
-if age >= 18 and hasLicense then
-    print("يمكنك قيادة السيارة")
-elseif age >= 18 and not hasLicense then
-    print("أنت كبير لكن ما عندك رخصة")
-else
-    print("صغير على القيادة")
-end
-
-local status = (age >= 18) and "بالغ" or "قاصر"
-print("الحالة: " .. status)`,
-    loop: `-- الحلقات
-print("=== for loop ===")
-for i = 1, 5 do
-    print("الرقم: " .. i)
-end
-
-print("=== while loop ===")
-local count = 3
-while count > 0 do
-    print("العد التنازلي: " .. count)
-    count = count - 1
-end
-
-print("=== repeat loop ===")
-local n = 1
-repeat
-    print("repeat: " .. n)
-    n = n + 1
-until n > 3`,
-    while: `-- while loop متقدم
-local correct = false
-local attempts = 0
-
-while not correct and attempts < 3 do
-    attempts = attempts + 1
-    print("محاولة " .. attempts)
-    if attempts == 2 then
-        correct = true
-        print("تم التخمين الصحيح!")
-    end
-end`,
-    forpairs: `-- for مع pairs و ipairs
-local person = {
-    name = "Ali",
-    age = 25,
-    city = "الرياض"
-}
-
-print("=== pairs ===")
-for key, value in pairs(person) do
-    print(key .. " = " .. tostring(value))
-end
-
-local numbers = {10, 20, 30, 40}
-print("=== ipairs ===")
-for index, value in ipairs(numbers) do
-    print(index .. " -> " .. value)
-end`,
-    string: `-- النصوص في Lua
-local str1 = "Hello"
-local str2 = 'World'
-local str3 = [[نص
-متعدد
-الأسطر]]
-
-print(str1 .. " " .. str2)
-print("طول النص: " .. #str1)
-print("النص الكبير: " .. string.upper(str1))
-print("النص الصغير: " .. string.lower(str2))
-print(str3)
-
-local text = "أحب Lua"
-print(string.gsub(text, "Lua", "البرمجة"))`,
-    string2: `-- نصوص متعددة الأسطر
-local poem = [[
-Lua لغة جميلة
-سهلة وقوية
-تعلمها ممتع
-]]
-
-print(poem)
-
-local quote = "He said \"Hello\""
-print(quote)`,
-    stringfuncs: `-- دوال النصوص
-local text = "Hello World"
-
-print("upper: " .. string.upper(text))
-print("lower: " .. string.lower(text))
-print("length: " .. string.len(text))
-print("sub(1,5): " .. string.sub(text, 1, 5))
-print("sub(7): " .. string.sub(text, 7))
-print("find 'World': " .. string.find(text, "World"))
-
-local num = 42
-print("tostring: " .. tostring(num))`,
-    stringfind: `-- البحث والاستبدال
-local text = "The quick brown fox jumps over the lazy dog"
-
-local startPos, endPos = string.find(text, "fox")
-print("found 'fox' at: " .. startPos .. " to " .. endPos)
-
-local newText, count = string.gsub(text, "o", "0")
-print("replaced " .. count .. " times")
-print("result: " .. newText)
-
-local result = string.gsub("hello 123 world", "%d+", "NUM")
-print("numbers replaced: " .. result)`,
-    stringformat: `-- تنسيق النصوص
-local name = "Ali"
-local age = 25
-local pi = 3.14159
-
-print(string.format("Name: %s, Age: %d", name, age))
-print(string.format("Pi = %.2f", pi))
-print(string.format("Pi = %.4f", pi))
-print(string.format("Number: %05d", 42))
-print(string.format("Hex: %x", 255))
-
-print(string.format("%-10s|", "left"))
-print(string.format("%10s|", "right"))`,
-    patterns: `-- الأنماط في Lua
-local text = "Hello 123 World"
-
-print(string.match(text, "%d+"))
-print(string.match(text, "%a+"))
-
-print("=== all words ===")
-for word in string.gmatch(text, "%a+") do
-    print(word)
-end
-
-print("=== all digits ===")
-for num in string.gmatch("a1b2c3d4", "%d") do
-    print(num)
-end
-
-local date = "Today is 2024-06-24"
-local y, m, d = string.match(date, "(%d+)-(%d+)-(%d+)")
-print("Year: " .. y .. ", Month: " .. m .. ", Day: " .. d)`
-};
-
-const codeEditor = document.getElementById('codeEditor');
-const output = document.getElementById('output');
-const visualOutput = document.getElementById('visualOutput');
-const lessonContent = document.getElementById('lessonContent');
-const currentLessonTitle = document.getElementById('currentLesson');
-
-document.querySelectorAll('.lesson-section h3').forEach(header => {
-    header.addEventListener('click', () => {
-        header.parentElement.classList.toggle('collapsed');
-    });
-});
-
-document.querySelectorAll('.lesson-list li').forEach(item => {
-    item.addEventListener('click', () => {
-        document.querySelectorAll('.lesson-list li').forEach(li => li.classList.remove('active'));
-        item.classList.add('active');
-        const lessonKey = item.dataset.lesson;
-        if (lessons[lessonKey]) {
-            lessonContent.innerHTML = lessons[lessonKey].content;
-            currentLessonTitle.textContent = lessons[lessonKey].title;
-        }
-    });
-});
-
-function loadExample(name) {
-    if (examples[name]) {
-        codeEditor.value = examples[name];
-        codeEditor.style.background = '#1e3a5f';
-        setTimeout(() => { codeEditor.style.background = '#0f172a'; }, 300);
-    }
-}
-
-function clearOutput() {
-    output.innerHTML = '<div class="output-line info">🚀 جاهز لتشغيل الكود...</div><div class="output-line info">─────────────────────────</div>';
-    visualOutput.innerHTML = '<div class="visual-empty">🎨 اضغط "تشغيل" لرؤية تصور السكربت</div>';
-}
-
-function addOutput(type, text) {
-    const div = document.createElement('div');
-    div.className = 'output-line ' + type;
-    div.textContent = text;
-    output.appendChild(div);
-    output.scrollTop = output.scrollHeight;
-}
-
-// Syntax highlighting for Lua
-function highlightLua(code) {
-    let html = '';
-    const lines = code.split('\n');
-    const keywords = ['local', 'function', 'end', 'if', 'then', 'else', 'elseif', 'for', 'do', 'while', 'repeat', 'until', 'return', 'and', 'or', 'not', 'in', 'nil', 'true', 'false'];
-
-    lines.forEach(line => {
-        let highlighted = line
-            .replace(/(--.*$)/g, '<span class="cm">$1</span>')
-            .replace(/("(?:[^"\\]|\\.)*")/g, '<span class="str">$1</span>')
-            .replace(/('(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>')
-            .replace(/(\b\d+\.?\d*\b)/g, '<span class="num">$1</span>');
-
-        keywords.forEach(kw => {
-            const regex = new RegExp('\\b' + kw + '\\b', 'g');
-            highlighted = highlighted.replace(regex, '<span class="kw">' + kw + '</span>');
-        });
-
-        highlighted = highlighted
-            .replace(/\b(print|type|tostring|tonumber|pairs|ipairs|next|assert|error|pcall|xpcall|collectgarbage|dofile|loadfile|load|require|module|select|unpack|rawget|rawset|rawequal|setmetatable|getmetatable)\b/g, '<span class="func">$1</span>')
-            .replace(/\b(math|string|table|io|os|debug|coroutine|package)\b/g, '<span class="var">$1</span>')
-            .replace(/(\+|-|\*|\/|%|\^|\.\.|==|~=|<=|>=|<|>|=)/g, '<span class="op">$1</span>');
-
-        html += '<div class="visual-code-line">' + highlighted + '</div>';
-    });
-    return html;
-}
-
-// Parse code for visualization
-function visualizeCode(code) {
-    const lines = code.split('\n');
-    let html = '';
-
-    // Variables found
-    let vars = [];
-    let funcs = [];
-    let tbls = [];
-    let loops = [];
-    let conds = [];
-
-    lines.forEach((line, idx) => {
-        const trimmed = line.trim();
-
-        // Variables
-        const varMatch = trimmed.match(/^local\s+(\w+)\s*=/);
-        if (varMatch && !trimmed.includes('function')) {
-            const name = varMatch[1];
-            const val = trimmed.substring(trimmed.indexOf('=') + 1).trim();
-            let type = 'any';
-            if (val.startsWith('"') || val.startsWith("'")) type = 'string';
-            else if (val.startsWith('{')) type = 'table';
-            else if (val.startsWith('function') || val.includes('function')) type = 'function';
-            else if (!isNaN(parseFloat(val))) type = 'number';
-            else if (val === 'true' || val === 'false') type = 'boolean';
-            vars.push({name, type, value: val.length > 30 ? val.substring(0, 30) + '...' : val});
-        }
-
-        // Functions
-        const funcMatch = trimmed.match(/function\s+(\w+)/);
-        if (funcMatch) {
-            funcs.push({name: funcMatch[1], line: idx + 1});
-        }
-
-        // Tables
-        const tblMatch = trimmed.match(/^local\s+(\w+)\s*=\s*\{/);
-        if (tblMatch) {
-            tbls.push({name: tblMatch[1], line: idx + 1});
-        }
-
-        // Loops
-        if (trimmed.startsWith('for ')) loops.push({type: 'for', line: idx + 1, code: trimmed.substring(0, 40)});
-        if (trimmed.startsWith('while ')) loops.push({type: 'while', line: idx + 1, code: trimmed.substring(0, 40)});
-        if (trimmed.startsWith('repeat')) loops.push({type: 'repeat', line: idx + 1});
-
-        // Conditions
-        if (trimmed.startsWith('if ')) conds.push({type: 'if', line: idx + 1, code: trimmed.substring(0, 40)});
-    });
-
-    // Build visualization
-    html += '<div class="visual-box">';
-    html += '<div class="visual-box-title">📋 الكود مع التلوين</div>';
-    html += highlightLua(code);
-    html += '</div>';
-
-    if (vars.length > 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">📦 المتغيرات (' + vars.length + ')</div>';
-        vars.forEach(v => {
-            html += '<div class="visual-var">';
-            html += '<span class="visual-var-name">' + v.name + '</span>';
-            html += '<span class="visual-var-type">' + v.type + '</span>';
-            html += '<span class="visual-var-value">= ' + v.value + '</span>';
-            html += '</div>';
-        });
-        html += '</div>';
-    }
-
-    if (funcs.length > 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">⚙️ الدوال (' + funcs.length + ')</div>';
-        funcs.forEach(f => {
-            html += '<div class="visual-var">';
-            html += '<span class="visual-var-name">' + f.name + '()</span>';
-            html += '<span class="visual-var-type">function</span>';
-            html += '<span class="visual-var-value">سطر ' + f.line + '</span>';
-            html += '</div>';
-        });
-        html += '</div>';
-    }
-
-    if (tbls.length > 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">📊 الجداول (' + tbls.length + ')</div>';
-        tbls.forEach(t => {
-            html += '<div class="visual-var">';
-            html += '<span class="visual-var-name">' + t.name + '</span>';
-            html += '<span class="visual-var-type">table</span>';
-            html += '<span class="visual-var-value">سطر ' + t.line + '</span>';
-            html += '</div>';
-        });
-        html += '</div>';
-    }
-
-    if (loops.length > 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">🔄 الحلقات (' + loops.length + ')</div>';
-        html += '<div class="visual-flow">';
-        loops.forEach((l, i) => {
-            html += '<div class="flow-step">';
-            html += '<div class="flow-step-num">' + (i + 1) + '</div>';
-            html += '<div class="flow-step-text">' + l.type + ' - سطر ' + l.line + '</div>';
-            html += '</div>';
-            if (i < loops.length - 1) html += '<div class="flow-arrow">↓</div>';
-        });
-        html += '</div></div>';
-    }
-
-    if (conds.length > 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">❓ الشروط (' + conds.length + ')</div>';
-        conds.forEach((c, i) => {
-            html += '<div class="flow-step">';
-            html += '<div class="flow-step-num">' + (i + 1) + '</div>';
-            html += '<div class="flow-step-text">if - سطر ' + c.line + '</div>';
-            html += '</div>';
-        });
-        html += '</div>';
-    }
-
-    if (vars.length === 0 && funcs.length === 0 && tbls.length === 0 && loops.length === 0 && conds.length === 0) {
-        html += '<div class="visual-box">';
-        html += '<div class="visual-box-title">📋 الكود</div>';
-        html += highlightLua(code);
-        html += '</div>';
-    }
-
-    return html;
-}
-
-function runCode() {
-    const code = codeEditor.value;
-    addOutput('input', '> تشغيل الكود...');
-    addOutput('info', '─────────────────────────');
-
-    // Visualize
-    visualOutput.innerHTML = visualizeCode(code);
-
-    try {
-        interpretLua(code);
-    } catch (e) {
-        addOutput('error', 'خطأ: ' + e.message);
-    }
-
-    addOutput('info', '─────────────────────────');
-    addOutput('info', '✅ انتهى التنفيذ');
-}
-
-function interpretLua(code) {
-    const lines = code.split('\n');
-    let variables = {};
-    let localVars = {};
-    let tables = {};
-    let functions = {};
-    let i = 0;
-
-    function evaluate(expr) {
-        expr = expr.trim();
-        if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) {
-            return expr.slice(1, -1);
-        }
-        if (expr.startsWith('[[') && expr.endsWith(']]')) {
-            return expr.slice(2, -2);
-        }
-        if (expr.startsWith('[=') && expr.includes(']=')) {
-            const closeIdx = expr.lastIndexOf(']=');
-            return expr.slice(expr.indexOf('[')+1, closeIdx);
-        }
-        if (!isNaN(parseFloat(expr)) && isFinite(expr)) {
-            return parseFloat(expr);
-        }
-        if (expr === 'true') return true;
-        if (expr === 'false') return false;
-        if (expr === 'nil') return null;
-        if (localVars.hasOwnProperty(expr)) return localVars[expr];
-        if (variables.hasOwnProperty(expr)) return variables[expr];
-        if (tables.hasOwnProperty(expr)) return tables[expr];
-
-        const dotMatch = expr.match(/^(.+)\.(.+)$/);
-        if (dotMatch) {
-            const tableName = dotMatch[1].trim();
-            const key = dotMatch[2].trim();
-            const table = tables[tableName] || variables[tableName] || localVars[tableName];
-            if (table && typeof table === 'object') return table[key];
-        }
-
-        const bracketMatch = expr.match(/^(.+)\[(.+)\]$/);
-        if (bracketMatch) {
-            const tableName = bracketMatch[1].trim();
-            const key = evaluate(bracketMatch[2].trim());
-            const table = tables[tableName] || variables[tableName] || localVars[tableName];
-            if (table && typeof table === 'object') return table[key];
-        }
-
-        if (expr.includes('..')) {
-            const parts = expr.split('..').map(p => evaluate(p.trim()));
-            return parts.join('');
-        }
-
-        try {
-            let evalExpr = expr;
-            for (let v in localVars) {
-                evalExpr = evalExpr.replace(new RegExp('\\b' + v + '\\b', 'g'), JSON.stringify(localVars[v]));
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">تمت الإضافة إلى السلة!</span>
+    </div>
+
+    <script>
+        // Particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
             }
-            for (let v in variables) {
-                evalExpr = evalExpr.replace(new RegExp('\\b' + v + '\\b', 'g'), JSON.stringify(variables[v]));
-            }
-            evalExpr = evalExpr.replace(/~= /g, '!== ');
-            evalExpr = evalExpr.replace(/\/\/.*$/g, '');
-            if (/^[0-9+\-*/^%().\s]+$/.test(evalExpr)) {
-                evalExpr = evalExpr.replace(/\^/g, '**');
-                return Function('"use strict"; return (' + evalExpr + ')')();
-            }
-            return Function('"use strict"; return (' + evalExpr + ')')();
-        } catch(e) {
-            return expr;
         }
-    }
+        createParticles();
 
-    while (i < lines.length) {
-        let line = lines[i].trim();
-        if (!line || line.startsWith('--')) { i++; continue; }
-        const commentIdx = line.indexOf(' --');
-        if (commentIdx > 0) line = line.substring(0, commentIdx).trim();
-        if (line.startsWith('--[[')) {
-            while (i < lines.length && !lines[i].includes(']]')) i++;
-            i++; continue;
-        }
-
-        if (line.startsWith('local ')) {
-            const rest = line.substring(6).trim();
-            if (rest.startsWith('function ')) {
-                const funcMatch = rest.match(/function\s+(\w+)\s*\(([^)]*)\)/);
-                if (funcMatch) {
-                    const funcName = funcMatch[1];
-                    const params = funcMatch[2].split(',').map(p => p.trim()).filter(p => p);
-                    let funcBody = [];
-                    i++;
-                    let depth = 1;
-                    while (i < lines.length && depth > 0) {
-                        const bodyLine = lines[i].trim();
-                        if (bodyLine.startsWith('function ') || bodyLine.startsWith('if ') || bodyLine.startsWith('for ') || bodyLine.startsWith('while ') || bodyLine.startsWith('repeat')) depth++;
-                        if (bodyLine === 'end') depth--;
-                        if (depth > 0) funcBody.push(lines[i]);
-                        i++;
-                    }
-                    localVars[funcName] = { type: 'function', params, body: funcBody };
-                    continue;
-                }
-            }
-            const tableMatch = rest.match(/^(\w+)\s*=\s*\{([^}]*)\}/);
-            if (tableMatch) {
-                const name = tableMatch[1];
-                const content = tableMatch[2];
-                const table = {};
-                if (content.trim()) {
-                    const items = content.split(',').map(s => s.trim()).filter(s => s);
-                    items.forEach((item, idx) => {
-                        if (item.includes('=')) {
-                            const [k, v] = item.split('=').map(s => s.trim());
-                            table[k] = evaluate(v);
-                        } else {
-                            table[idx + 1] = evaluate(item);
-                        }
-                    });
-                }
-                localVars[name] = table;
-                tables[name] = table;
-                i++;
-                continue;
-            }
-            if (rest.includes('=')) {
-                const eqIdx = rest.indexOf('=');
-                const names = rest.substring(0, eqIdx).split(',').map(n => n.trim());
-                const values = rest.substring(eqIdx + 1).split(',').map(v => evaluate(v.trim()));
-                names.forEach((name, idx) => {
-                    localVars[name] = values[idx] !== undefined ? values[idx] : null;
-                });
+        // Navbar scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
             } else {
-                rest.split(',').forEach(n => { localVars[n.trim()] = null; });
+                navbar.classList.remove('scrolled');
             }
-            i++;
-            continue;
+        });
+
+        // Smooth scroll
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
 
-        if (line.startsWith('function ')) {
-            const funcMatch = line.match(/function\s+(\w+)\s*\(([^)]*)\)/);
-            if (funcMatch) {
-                const funcName = funcMatch[1];
-                const params = funcMatch[2].split(',').map(p => p.trim()).filter(p => p);
-                let funcBody = [];
-                i++;
-                let depth = 1;
-                while (i < lines.length && depth > 0) {
-                    const bodyLine = lines[i].trim();
-                    if (bodyLine.startsWith('function ') || bodyLine.startsWith('if ') || bodyLine.startsWith('for ') || bodyLine.startsWith('while ') || bodyLine.startsWith('repeat')) depth++;
-                    if (bodyLine === 'end') depth--;
-                    if (depth > 0) funcBody.push(lines[i]);
-                    i++;
-                }
-                functions[funcName] = { params, body: funcBody };
-                continue;
-            }
-        }
-
-        if (line.startsWith('if ')) {
-            const condition = line.substring(3).replace(/then$/, '').trim();
-            const condResult = evaluate(condition);
-            let ifBody = [];
-            let elseBody = [];
-            let inElse = false;
-            i++;
-            let depth = 1;
-            while (i < lines.length && depth > 0) {
-                const bodyLine = lines[i].trim();
-                if (bodyLine.startsWith('if ')) depth++;
-                if (bodyLine === 'end') {
-                    depth--;
-                    if (depth === 0) { i++; break; }
-                }
-                if (depth === 1 && bodyLine.startsWith('elseif ')) { inElse = true; i++; continue; }
-                if (depth === 1 && bodyLine === 'else') { inElse = true; i++; continue; }
-                if (depth > 0) {
-                    if (inElse) elseBody.push(lines[i]);
-                    else ifBody.push(lines[i]);
-                }
-                i++;
-            }
-            if (condResult) {
-                ifBody.forEach(bline => {
-                    const trimmed = bline.trim();
-                    if (trimmed.startsWith('print(')) {
-                        const arg = trimmed.substring(6, trimmed.length - 1);
-                        addOutput('output', evaluate(arg));
-                    }
-                });
-            } else {
-                elseBody.forEach(bline => {
-                    const trimmed = bline.trim();
-                    if (trimmed.startsWith('print(')) {
-                        const arg = trimmed.substring(6, trimmed.length - 1);
-                        addOutput('output', evaluate(arg));
-                    }
-                });
-            }
-            continue;
-        }
-
-        if (line.startsWith('for ')) {
-            const forMatch = line.match(/for\s+(\w+)\s*=\s*(.+)\s*,\s*(.+)\s+do/);
-            if (forMatch) {
-                const varName = forMatch[1];
-                const start = evaluate(forMatch[2]);
-                const end = evaluate(forMatch[3]);
-                let loopBody = [];
-                i++;
-                while (i < lines.length && lines[i].trim() !== 'end') {
-                    loopBody.push(lines[i]);
-                    i++;
-                }
-                i++;
-                for (let j = start; j <= end; j++) {
-                    localVars[varName] = j;
-                    loopBody.forEach(bline => {
-                        const trimmed = bline.trim();
-                        if (trimmed.startsWith('print(')) {
-                            const arg = trimmed.substring(6, trimmed.length - 1);
-                            let result = evaluate(arg);
-                            if (typeof result === 'string') {
-                                result = result.replace(new RegExp('\\.\\.' + varName, 'g'), j.toString());
-                                result = result.replace(new RegExp(varName + '\\.\\.', 'g'), j.toString());
-                            }
-                            addOutput('output', result);
-                        }
-                    });
-                }
-                continue;
-            }
-            const pairsMatch = line.match(/for\s+(\w+),?\s*(\w*)?\s+in\s+pairs\((.+)\)\s+do/);
-            if (pairsMatch) {
-                const keyVar = pairsMatch[1];
-                const valVar = pairsMatch[2] || '';
-                const tableName = pairsMatch[3];
-                const table = tables[tableName] || variables[tableName] || localVars[tableName] || {};
-                let loopBody = [];
-                i++;
-                while (i < lines.length && lines[i].trim() !== 'end') {
-                    loopBody.push(lines[i]);
-                    i++;
-                }
-                i++;
-                for (let k in table) {
-                    if (valVar) localVars[valVar] = table[k];
-                    localVars[keyVar] = k;
-                    loopBody.forEach(bline => {
-                        const trimmed = bline.trim();
-                        if (trimmed.startsWith('print(')) {
-                            const arg = trimmed.substring(6, trimmed.length - 1);
-                            addOutput('output', evaluate(arg));
-                        }
-                    });
-                }
-                continue;
-            }
-            const ipairsMatch = line.match(/for\s+(\w+),\s*(\w+)\s+in\s+ipairs\((.+)\)\s+do/);
-            if (ipairsMatch) {
-                const idxVar = ipairsMatch[1];
-                const valVar = ipairsMatch[2];
-                const tableName = ipairsMatch[3];
-                const table = tables[tableName] || variables[tableName] || localVars[tableName] || {};
-                let loopBody = [];
-                i++;
-                while (i < lines.length && lines[i].trim() !== 'end') {
-                    loopBody.push(lines[i]);
-                    i++;
-                }
-                i++;
-                let idx = 1;
-                while (table[idx] !== undefined) {
-                    localVars[idxVar] = idx;
-                    localVars[valVar] = table[idx];
-                    loopBody.forEach(bline => {
-                        const trimmed = bline.trim();
-                        if (trimmed.startsWith('print(')) {
-                            const arg = trimmed.substring(6, trimmed.length - 1);
-                            addOutput('output', evaluate(arg));
-                        }
-                    });
-                    idx++;
-                }
-                continue;
-            }
-        }
-
-        if (line.startsWith('while ')) {
-            const condition = line.substring(6).replace(/do$/, '').trim();
-            let loopBody = [];
-            i++;
-            while (i < lines.length && lines[i].trim() !== 'end') {
-                loopBody.push(lines[i]);
-                i++;
-            }
-            i++;
-            let safety = 0;
-            while (evaluate(condition) && safety < 100) {
-                safety++;
-                loopBody.forEach(bline => {
-                    const trimmed = bline.trim();
-                    if (trimmed.startsWith('print(')) {
-                        const arg = trimmed.substring(6, trimmed.length - 1);
-                        addOutput('output', evaluate(arg));
-                    }
-                    if (trimmed.includes('=') && !trimmed.startsWith('local')) {
-                        const eqIdx = trimmed.indexOf('=');
-                        const name = trimmed.substring(0, eqIdx).trim();
-                        const val = evaluate(trimmed.substring(eqIdx + 1).trim());
-                        if (localVars.hasOwnProperty(name)) localVars[name] = val;
-                        else variables[name] = val;
-                    }
-                });
-            }
-            continue;
-        }
-
-        if (line.startsWith('repeat')) {
-            let loopBody = [];
-            i++;
-            while (i < lines.length && !lines[i].trim().startsWith('until ')) {
-                loopBody.push(lines[i]);
-                i++;
-            }
-            const untilLine = lines[i].trim();
-            const condition = untilLine.substring(6).trim();
-            i++;
-            let safety = 0;
-            do {
-                safety++;
-                loopBody.forEach(bline => {
-                    const trimmed = bline.trim();
-                    if (trimmed.startsWith('print(')) {
-                        const arg = trimmed.substring(6, trimmed.length - 1);
-                        addOutput('output', evaluate(arg));
-                    }
-                });
-            } while (!evaluate(condition) && safety < 100);
-            continue;
-        }
-
-        if (line.includes('=') && !line.startsWith('if') && !line.startsWith('for') && !line.startsWith('while')) {
-            const eqIdx = line.indexOf('=');
-            const name = line.substring(0, eqIdx).trim();
-            const value = line.substring(eqIdx + 1).trim();
-            if (name.includes('.')) {
-                const parts = name.split('.');
-                const tableName = parts[0];
-                const key = parts[1];
-                const table = tables[tableName] || variables[tableName] || localVars[tableName];
-                if (table && typeof table === 'object') {
-                    table[key] = evaluate(value);
-                }
-            } else if (name.includes('[')) {
-                const bracketMatch = name.match(/^(.+)\[(.+)\]$/);
-                if (bracketMatch) {
-                    const tableName = bracketMatch[1].trim();
-                    const key = evaluate(bracketMatch[2].trim());
-                    const table = tables[tableName] || variables[tableName] || localVars[tableName];
-                    if (table && typeof table === 'object') {
-                        table[key] = evaluate(value);
-                    }
-                }
-            } else {
-                if (localVars.hasOwnProperty(name)) {
-                    localVars[name] = evaluate(value);
-                } else {
-                    variables[name] = evaluate(value);
-                }
-            }
-            i++;
-            continue;
-        }
-
-        if (line.startsWith('print(')) {
-            const arg = line.substring(6, line.length - 1);
-            const result = evaluate(arg);
-            addOutput('output', result);
-            i++;
-            continue;
-        }
-
-        const funcCallMatch = line.match(/^(\w+)\s*\(([^)]*)\)$/);
-        if (funcCallMatch && functions[funcCallMatch[1]]) {
-            const funcName = funcCallMatch[1];
-            const args = funcCallMatch[2].split(',').map(a => evaluate(a.trim()));
-            const func = functions[funcName];
-            const savedVars = {...localVars};
-            func.params.forEach((p, idx) => {
-                localVars[p] = args[idx];
-            });
-            func.body.forEach(bline => {
-                const trimmed = bline.trim();
-                if (trimmed.startsWith('return ')) {
-                    const ret = evaluate(trimmed.substring(7));
-                    addOutput('output', ret);
-                } else if (trimmed.startsWith('print(')) {
-                    const arg = trimmed.substring(6, trimmed.length - 1);
-                    addOutput('output', evaluate(arg));
+        // Fade in animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
                 }
             });
-            localVars = savedVars;
-            i++;
-            continue;
+        }, observerOptions);
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Cart
+        let cart = [];
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+            showNotification('تمت إضافة ' + name + ' إلى السلة!');
         }
 
-        if (line.startsWith('type(')) {
-            const arg = line.substring(5, line.length - 1);
-            const val = evaluate(arg);
-            let typeName = typeof val;
-            if (val === null) typeName = 'nil';
-            if (Array.isArray(val) || (typeof val === 'object' && val !== null)) typeName = 'table';
-            if (typeof val === 'boolean') typeName = 'boolean';
-            addOutput('output', typeName);
-            i++;
-            continue;
-        }
+        function updateCart() {
+            const count = document.getElementById('cartCount');
+            const items = document.getElementById('cartItems');
+            const total = document.getElementById('cartTotal');
 
-        if (line.startsWith('tostring(')) {
-            const arg = line.substring(9, line.length - 1);
-            addOutput('output', String(evaluate(arg)));
-            i++;
-            continue;
-        }
+            count.textContent = cart.length;
 
-        if (line.includes('string.')) {
-            const strMatch = line.match(/string\.(\w+)\(([^)]+)\)/);
-            if (strMatch) {
-                const func = strMatch[1];
-                const args = strMatch[2].split(',').map(a => evaluate(a.trim()));
-                let result;
-                if (func === 'upper') result = String(args[0]).toUpperCase();
-                else if (func === 'lower') result = String(args[0]).toLowerCase();
-                else if (func === 'gsub') result = String(args[0]).replace(new RegExp(args[1], 'g'), args[2]);
-                else if (func === 'sub') result = String(args[0]).substring(args[1] - 1, args[2]);
-                else if (func === 'len') result = String(args[0]).length;
-                else if (func === 'find') result = String(args[0]).indexOf(args[1]) + 1;
-                else if (func === 'format') {
-                    let fmt = args[0];
-                    for (let k = 1; k < args.length; k++) {
-                        fmt = fmt.replace(/%[sdxf%]/, args[k]);
-                    }
-                    result = fmt;
-                }
-                else if (func === 'match') result = String(args[0]).match(new RegExp(args[1]));
-                else if (func === 'gmatch') result = 'gmatch iterator';
-                else result = line;
-                if (line.startsWith('print(')) {
-                    addOutput('output', result);
-                }
+            if (cart.length === 0) {
+                items.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;">السلة فارغة</p>';
+                total.textContent = '$0.00';
+                return;
             }
-            i++;
-            continue;
+
+            let html = '';
+            let sum = 0;
+            cart.forEach((item, i) => {
+                sum += item.price;
+                html += '<div class="cart-item">' +
+                    '<div class="cart-item-info" style="flex:1;">' +
+                    '<h4>' + item.name + '</h4>' +
+                    '<p>$' + item.price.toFixed(2) + '</p>' +
+                    '</div>' +
+                    '<button onclick="removeFromCart(' + i + ')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;">' +
+                    '<i class="fas fa-trash"></i></button></div>';
+            });
+            items.innerHTML = html;
+            total.textContent = '$' + sum.toFixed(2);
         }
 
-        if (line.includes('math.')) {
-            const mathMatch = line.match(/math\.(\w+)\(([^)]*)\)/);
-            if (mathMatch) {
-                const func = mathMatch[1];
-                const args = mathMatch[2] ? mathMatch[2].split(',').map(a => evaluate(a.trim())) : [];
-                let result;
-                if (func === 'sqrt') result = Math.sqrt(args[0]);
-                else if (func === 'random') result = args.length > 1 ? Math.floor(Math.random() * (args[1] - args[0] + 1)) + args[0] : Math.random();
-                else if (func === 'floor') result = Math.floor(args[0]);
-                else if (func === 'ceil') result = Math.ceil(args[0]);
-                else if (func === 'abs') result = Math.abs(args[0]);
-                else if (func === 'max') result = Math.max(...args);
-                else if (func === 'min') result = Math.min(...args);
-                else if (func === 'pi') result = Math.PI;
-                else if (func === 'sin') result = Math.sin(args[0]);
-                else if (func === 'cos') result = Math.cos(args[0]);
-                else if (func === 'tan') result = Math.tan(args[0]);
-                else if (func === 'rad') result = args[0] * Math.PI / 180;
-                else if (func === 'deg') result = args[0] * 180 / Math.PI;
-                else result = 'math.' + func;
-                if (line.startsWith('print(')) {
-                    addOutput('output', result);
-                }
-            } else if (line.includes('math.pi')) {
-                if (line.startsWith('print(')) {
-                    addOutput('output', Math.PI);
-                }
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function openCart() {
+            document.getElementById('cartModal').classList.add('active');
+        }
+
+        function closeCart() {
+            document.getElementById('cartModal').classList.remove('active');
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showNotification('السلة فارغة!');
+                return;
             }
-            i++;
-            continue;
+            showNotification('جاري توجيهك لبوابة الدفع...');
+            closeCart();
         }
 
-        if (line.includes('table.')) {
-            const tableMatch = line.match(/table\.(\w+)\(([^)]+)\)/);
-            if (tableMatch) {
-                const func = tableMatch[1];
-                const args = tableMatch[2].split(',').map(a => evaluate(a.trim()));
-                let result;
-                if (func === 'concat') {
-                    const arr = args[0];
-                    const sep = args[1] || ', ';
-                    if (Array.isArray(arr)) result = arr.join(sep);
-                    else result = Object.values(arr).join(sep);
-                } else if (func === 'insert') {
-                    const arr = args[0];
-                    const val = args[1];
-                    if (Array.isArray(arr)) arr.push(val);
-                    result = arr;
-                } else if (func === 'remove') {
-                    const arr = args[0];
-                    const idx = args[1];
-                    if (Array.isArray(arr)) result = arr.splice(idx - 1, 1)[0];
-                } else if (func === 'sort') {
-                    const arr = args[0];
-                    if (Array.isArray(arr)) arr.sort((a, b) => a - b);
-                    result = arr;
-                } else {
-                    result = line;
-                }
-                if (line.startsWith('print(')) {
-                    addOutput('output', result);
-                }
-            }
-            i++;
-            continue;
+        // Notification
+        function showNotification(text) {
+            const notif = document.getElementById('notification');
+            document.getElementById('notificationText').textContent = text;
+            notif.classList.add('show');
+            setTimeout(() => notif.classList.remove('show'), 3000);
         }
 
-        i++;
-    }
-}
-</script>
+        // Support form
+        function submitSupport(e) {
+            e.preventDefault();
+            showNotification('تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.');
+            e.target.reset();
+        }
+
+        // Close modal on overlay click
+        document.getElementById('cartModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeCart();
+        });
+    </script>
 </body>
 </html>
